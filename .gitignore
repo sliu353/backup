@@ -1,0 +1,8 @@
+.idea
+node_modules
+*.log
+*.png
+*.jpg
+*.mp4
+*.wav
+files
