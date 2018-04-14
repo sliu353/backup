@@ -1,98 +1,108 @@
 "use strict";
 
-var app = require("app");
-var BrowserWindow = require("browser-window");
-var globalShortcut = require("global-shortcut");
-var configuration = require("./configuration");
+const electron = require('electron');
+const app = electron.app;
+const BrowserWindow = electron.BrowserWindow;
+
 const spawn = require("child_process");
-var ipc = require("ipc");
 var cmd = require("node-cmd");
 const http = require("http");
-var request = require('request');
+const fs = require('fs');
+//var request = require('request');
+const axios = require("axios");
+const url = require('url');
+var fsExtra = require('fs-extra');
+var q = require('q');
+var prependFile = require('prepend-file');
+
 
 var mainWindow = null;
 var settingsWindow = null;
 var enduroProcess = null;
 
-app.on("ready", function() {
-  if (!configuration.readSettings("shortcutKeys")) {
-    configuration.saveSettings("shortcutKeys", ["ctrl", "shift"]);
-  }
-
-  startEnduro();
-  tryConnect();
-
-  setGlobalShortcuts();
+app.on("ready", function () {
+	loadSplash();
+	startEnduro();
+	setTimeout(function () {
+		tryConnect();
+	}, 1000);
 });
 
 function tryConnect() {
-  http.get({
-	hostname: 'localhost',
-	port: 5000,
-	path: '/',
-	agent: false  // create a new agent just for this one request
-  }, function(res) {
-	  console.log(res);
-  });
-
-    mainWindow = new BrowserWindow({
-      frame: true,
-      height: 700,
-      resizable: true,
-      width: 1000
-    });
-
-    mainWindow.loadUrl("localhost:5000");
+	mainWindow.hide();
+	mainWindow = new BrowserWindow({
+		frame: true,
+		resizable: true
+	});
+	mainWindow.loadURL(url.format({
+		pathname: __dirname + '/electronApp/index.html',
+		protocol: 'file',
+		slashes: true,
+		webPreferences: {
+			webSecurity: false
+		}
+	}));
 }
 
-function setGlobalShortcuts() {
-  globalShortcut.unregisterAll();
-
-  var shortcutKeysSetting = configuration.readSettings("shortcutKeys");
-  var shortcutPrefix =
-    shortcutKeysSetting.length === 0 ? "" : shortcutKeysSetting.join("+") + "+";
-
-  globalShortcut.register(shortcutPrefix + "1", function() {
-    mainWindow.webContents.send("global-shortcut", 0);
-  });
-  globalShortcut.register(shortcutPrefix + "2", function() {
-    mainWindow.webContents.send("global-shortcut", 1);
-  });
+function loadSplash() {
+	mainWindow = new BrowserWindow({
+		frame: false,
+		height: 300,
+		resizable: false,
+		width: 300
+	});
+	mainWindow.loadURL(url.format({
+		pathname: __dirname + "/electronApp/splash.html",
+		protocol: 'file',
+		slashes: true,
+		webPreferences: {
+			webSecurity: false
+		}
+	}));
 }
 
 function startEnduro() {
-  cmd.run("enduro dev");
+	cmd.run("enduro dev");
 }
 
-ipc.on("close-main-window", function() {
-  app.quit();
+var indexDefPath = __dirname + '/cms/index.js';
+var destPath = __dirname + '/assets/js/index.js';
+
+fs.watch(indexDefPath, function (curr, prev) {
+	copyIndexDef()
+		.then(assignCopyIndexDef)
+		.then(tryConnect)
+		.catch(e => {
+			console.log(e);
+		});
+
 });
 
-ipc.on("open-settings-window", function() {
-  if (settingsWindow) {
-    return;
-  }
+function copyIndexDef() {
+	var copyIndexDefDeferred = q.defer();
+	fsExtra.copy(indexDefPath, destPath, err => {
+		if (err) {
+			console.error(err);
+			copyIndexDefDeferred.reject(err);
+			return;
+		}
+		console.log('success!');
+		copyIndexDefDeferred.resolve();
+	});
+	return copyIndexDefDeferred.promise;
+}
 
-  settingsWindow = new BrowserWindow({
-    frame: false,
-    height: 200,
-    resizable: false,
-    width: 200
-  });
-
-  settingsWindow.loadUrl("file://" + __dirname + "/app/settings.html");
-
-  settingsWindow.on("closed", function() {
-    settingsWindow = null;
-  });
-});
-
-ipc.on("close-settings-window", function() {
-  if (settingsWindow) {
-    settingsWindow.close();
-  }
-});
-
-ipc.on("set-global-shortcuts", function() {
-  setGlobalShortcuts();
-});
+function assignCopyIndexDef() {
+	var prefix = 'var content = ';
+	var assignCopyIndexDef = q.defer();
+	prependFile(destPath, prefix, err => {
+		if (err) {
+			console.error(err);
+			assignCopyIndexDef.reject(err);
+			return;
+		}
+		console.log('success!');
+		assignCopyIndexDef.resolve();
+	});
+	return assignCopyIndexDef.promise;
+}

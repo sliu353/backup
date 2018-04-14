@@ -6,12 +6,12 @@
         "type": "node",
         "request": "launch",
         "cwd": "${workspaceRoot}",
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+        "runtimeExecutable": "electron",
         "windows": {
-          "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
+          "runtimeExecutable": "electron"
         },
         "program": "${workspaceRoot}/main.js",
-        "protocol": "legacy"
+        "protocol": "inspector"
       },
       {
         "name": "Debug Renderer Process",

@@ -51,7 +51,7 @@
 			-->
 			{{#each content}} {{#if videoName}}
 			<div class="section">
-				<section class="home" id="{{index}}">
+				<section class="home" id="section{{@index}}">
 					<div class="container">
 						<div class="row">
 							<div id="overlay"></div>
@@ -66,7 +66,7 @@
 			</div>
 			{{else}}
 			<div class="section">
-				<section class="home" id="{{index}}">
+				<section class="home" id="section{{@index}}">
 					<div class="container">
 						<div class="row">
 							<div class="col-md-12 col-sm-12 section-content">
@@ -85,6 +85,7 @@
 		 crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
 		 crossorigin="anonymous"></script>
+		 <script src="assets/js/index.js"></script>
 		<script src="assets/js/index_v.js"></script>
 	</div>
 </body>
