@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "chokidar": "^2.0.3",
+    "enduro": "^1.4.46",
     "fs-extra": "^5.0.0",
     "nconf": "^0.7.2",
     "node-cmd": "^3.0.0",

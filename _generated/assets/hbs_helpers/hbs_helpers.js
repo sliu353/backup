@@ -1,5 +1,6 @@
 define([],function() { return function(enduro.templating_engine) { 
 
+
 // * ———————————————————————————————————————————————————————— * //
 // *    Add helper
 // *	Adds two numbers together
