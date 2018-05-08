@@ -51,8 +51,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 			</div>
 		</div>
 	</div>
-	{{/each}} {{/if}} 
-	{{#if is_type3}} {{#each sections}}{{#each images}}
+	{{/each}} {{/if}} {{#if is_type3}} {{#each sections}}{{#each images}}
 	<div class="modal fade" id="myModal{{@../../index}}-{{@../index}}-{{@index}}" tabindex="-1" role="dialog">
 		<div class="modal-dialog">
 			<!-- Modal content-->
@@ -78,12 +77,13 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 				</a>
 			</div>
 			<a href="../index.html">首页</a>
-			<a href="../about/about.html">走进尚东华夏</a>
-			<a href="../about/companies.html">旗下公司</a>
-			<a href="../about/platform.html">业务平台</a>
-			<a href="../about/news.html">新闻中心</a>
-			<a href="../about/hiring.html">人才招聘</a>
-			<a href="../about/contacts.html">联系我们</a>
+					{{#each global.pageLinks}}
+					{{#each this}}
+					<a href="{{this}}"></a>
+					{{/each}}
+					{{/each}}
+				</div>
+			</div>
 		</div>
 
 		<div id="main">
@@ -192,11 +192,35 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 						</div>
 						{{/each}}
 					</div>
-					
+
 
 				</div>
 			</div>
 			{{/if}}{{/each}}
+
+			<div class="about" style="margin-top: -200px">
+				<div class="container">
+					<div class="col-lg-12" style="text-align: center; ">
+						<nav aria-label="Page navigation example" style=" margin: 0 auto;">
+							<ul class="pagination justify-content-end">
+								<li class="page-item disabled">
+									<a class="page-link disabled" tabindex="-1">
+										<< 上一则新闻</a>
+								</li>
+								<li class="page-item disabled">
+									<a class="page-link">1</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="./news2.html">2</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="./news2.html">下一则新闻 >></a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
 
 
 			<!-- footer -->

@@ -1,0 +1,1 @@
+({"newsLinks":[{"new1(./news/new1.js)":"./news/new1.js"}]})

@@ -8,17 +8,22 @@ const spawn = require("child_process");
 var cmd = require("node-cmd");
 const http = require("http");
 const fs = require('fs');
-//var request = require('request');
 const axios = require("axios");
 const url = require('url');
 var fsExtra = require('fs-extra');
 var q = require('q');
 var prependFile = require('prepend-file');
-
+var chokidar = require('chokidar');
+var _ = require('lodash');
 
 var mainWindow = null;
 var settingsWindow = null;
 var enduroProcess = null;
+
+var indexDefPath = __dirname + '/cms/index.js';
+var destPath = __dirname + '/assets/js/index.js';
+var newsPath = __dirname + '/cms/generators/news';
+var pagePath = __dirname + '/cms/generators/page';
 
 app.on("ready", function () {
 	loadSplash();
@@ -27,6 +32,25 @@ app.on("ready", function () {
 		tryConnect();
 	}, 1000);
 });
+
+var newsWatcher = chokidar.watch(newsPath);
+var pagesWatcher = chokidar.watch(pagePath);
+
+newsWatcher.on('add', updateNewsPaths)
+	.on('unlink', updateNewsPaths);
+
+pagesWatcher.on('add', updatePagesPaths)
+	.on('unlink', updatePagesPaths);
+
+fs.watch(indexDefPath, function (curr, prev) {
+	copyIndexDef()
+		.then(assignCopyIndexDef)
+		.then(tryConnect)
+		.catch(e => {
+			console.log(e);
+		});
+});
+
 
 function tryConnect() {
 	mainWindow.hide();
@@ -65,18 +89,61 @@ function startEnduro() {
 	cmd.run("enduro dev");
 }
 
-var indexDefPath = __dirname + '/cms/index.js';
-var destPath = __dirname + '/assets/js/index.js';
-
-fs.watch(indexDefPath, function (curr, prev) {
-	copyIndexDef()
-		.then(assignCopyIndexDef)
-		.then(tryConnect)
-		.catch(e => {
-			console.log(e);
+function updateNewsPaths(param) {
+	fs.readdir(newsPath, (err, files) => {
+		var navPath = __dirname + '/cms/global/newsNav.js';
+		var navs = {};
+		navs.newsLinks =  getNewsPaths(files);
+		var fileContent = `(${JSON.stringify(navs)})`;
+		fs.writeFile(navPath, fileContent, (err) => {
+			if (err) throw err;
+			console.log('The file has been saved!');
 		});
+	})
+}
 
-});
+function updatePagesPaths(param) {
+	fs.readdir(pagePath, (err, files) => {
+		var navPath = __dirname + '/cms/global/pageNav.js';
+		fs.writeFile(navPath, getPagesPaths(files), (err) => {
+			if (err) throw err;
+			console.log('The file has been saved!');
+		});
+	})
+}
+
+function getNewsPaths(files) {
+	var links = [];
+	_.forEach(files, function (file) {
+		if (file === 'news.js') {
+			return;
+		}
+		var path = './news/' + file;
+		var name = `${file.split('.')[0]}(${path})`;
+		var item = {};
+		item[name] = path;
+		links.push(item);
+	});
+	return links;
+}
+
+function getPagesPaths(files) {
+	var result = {
+		pageLinks: []
+	};
+	_.forEach(files, function (file) {
+		if (file === 'page.js') {
+			return;
+		}
+		var fileName = file.split('.')[0];
+		var path = `./${fileName}.html`;
+		var name = `${fileName}(${path})`;
+		var item = {};
+		item[name] = path;
+		result.pageLinks.push(item);
+	});
+	return `(${JSON.stringify(result)})`;
+}
 
 function copyIndexDef() {
 	var copyIndexDefDeferred = q.defer();

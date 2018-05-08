@@ -1,5 +1,1 @@
-({
-    navs: [{
-        pageName: '' 
-    }]
-})
+({"pageLinks":[{"lalala(./lalala.html)":"./lalala.html"},{"oh(./oh.html)":"./oh.html"},{"tryhard(./tryhard.html)":"./tryhard.html"}]})
